@@ -1,0 +1,9 @@
+{
+    "appTitle": "Mon Application",
+    "restaurantName": "Nom du Restaurant",
+    "restaurantAddress": "Adresse du Restaurant",
+    "restaurantDescription": "Description du Restaurant",
+    "callButton": "APPELER",
+    "directionsButton": "ITINÉRAIRE",
+    "shareButton": "PARTAGER"
+} 
