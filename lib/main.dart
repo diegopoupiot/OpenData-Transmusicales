@@ -3,11 +3,17 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'pages/restaurants_list_page.dart';
+import 'pages/login_page.dart';
 
-final GoRouter _router = GoRouter(
+final _router = GoRouter(
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: '/restaurants',
       builder: (context, state) => const RestaurantsListPage(),
     ),
     GoRoute(
@@ -93,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
+          onPressed: () => context.go('/restaurants'),
         ),
         title: Text(
           widget.name,
@@ -103,6 +109,13 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => context.go('/'),
+            tooltip: 'Déconnexion',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -33,7 +33,6 @@ class _RestaurantsListPageState extends State<RestaurantsListPage> {
   }
 
   Future<List<Restaurant>> _fetchRestaurants() async {
-    // Simulate network delay
     await Future.delayed(const Duration(seconds: 1));
 
     return List.generate(
@@ -54,6 +53,13 @@ class _RestaurantsListPageState extends State<RestaurantsListPage> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.restaurantsPageTitle),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => context.go('/'),
+            tooltip: 'Déconnexion',
+          ),
+        ],
       ),
       body: FutureBuilder<List<Restaurant>>(
         future: _restaurantsFuture,
@@ -130,14 +136,6 @@ class _RestaurantsListPageState extends State<RestaurantsListPage> {
                             Text(
                               restaurant.address,
                               style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.favorite, size: 16),
-                                const SizedBox(width: 4),
-                                Text('${restaurant.likes}'),
-                              ],
                             ),
                           ],
                         ),
