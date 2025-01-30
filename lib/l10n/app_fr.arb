@@ -5,5 +5,27 @@
     "restaurantDescription": "Description du Restaurant",
     "callButton": "APPELER",
     "directionsButton": "ITINÉRAIRE",
-    "shareButton": "PARTAGER"
-} 
+    "shareButton": "PARTAGER",
+    "restaurantsPageTitle": "Restaurants",
+    "@restaurantsPageTitle": {
+        "description": "Title for the restaurants list page"
+    },
+    "restaurantName": "Restaurant {index}",
+    "@restaurantName": {
+        "description": "Name of the restaurant with its index",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    },
+    "restaurantAddress": "Adresse {index}",
+    "@restaurantAddress": {
+        "description": "Address of the restaurant with its index",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    }
+}

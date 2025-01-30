@@ -1,6 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
+import 'pages/restaurants_list_page.dart';
+
+final GoRouter _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const RestaurantsListPage(),
+    ),
+    GoRoute(
+      path: '/details',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return MyHomePage(
+          name: extra['name'],
+          address: extra['address'],
+          likes: extra['likes'],
+          imageUrl: extra['imageUrl'],
+        );
+      },
+    ),
+  ],
+);
 
 void main() {
   runApp(const MyApp());
@@ -11,9 +34,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: _router,
       title: 'Mon Application',
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -24,24 +48,41 @@ class MyApp extends StatelessWidget {
         Locale('en', ''),
       ],
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 66, 66, 66)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final String name;
+  final String address;
+  final int likes;
+  final String imageUrl;
+
+  const MyHomePage({
+    super.key,
+    required this.name,
+    required this.address,
+    required this.likes,
+    required this.imageUrl,
+  });
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int likes = 15; // Ajout d'un compteur de likes
-  bool isFavorite = false; // Nouvel état pour suivre si favori ou non
+  late int likes;
+  bool isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    likes = widget.likes;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +91,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
         title: Text(
-          l10n.appTitle,
+          widget.name,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -64,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Image.network(
-              'https://images.pexels.com/photos/2034335/pexels-photo-2034335.jpeg',
+              widget.imageUrl,
               height: 200,
               fit: BoxFit.cover,
             ),
@@ -78,14 +123,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.restaurantName,
+                        widget.name,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        l10n.restaurantAddress,
+                        widget.address,
                         style: const TextStyle(
                           color: Colors.grey,
                         ),
@@ -148,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Text('Partager'),
                   ],
                 ),
-              ],
+              ].toList(),
             ),
             const SizedBox(height: 16),
             Padding(

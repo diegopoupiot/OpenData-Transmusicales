@@ -1,9 +1,29 @@
 {
     "appTitle": "My Application",
-    "restaurantName": "Restaurant Name",
-    "restaurantAddress": "Restaurant Address",
+    "restaurantName": "{index}. Restaurant",
+    "@restaurantName": {
+        "description": "Name of the restaurant with its index",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    },
+    "restaurantAddress": "Address #{index}",
+    "@restaurantAddress": {
+        "description": "Address of the restaurant with its index",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    },
     "restaurantDescription": "Restaurant Description",
     "callButton": "CALL",
     "directionsButton": "DIRECTIONS",
-    "shareButton": "SHARE"
-} 
+    "shareButton": "SHARE",
+    "restaurantsPageTitle": "Restaurants",
+    "@restaurantsPageTitle": {
+        "description": "Title for the restaurants list page"
+    }
+}
