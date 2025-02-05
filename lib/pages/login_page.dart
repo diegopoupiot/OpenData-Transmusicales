@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_usernameController.text == 'admin' &&
         _passwordController.text == 'password') {
       if (mounted) {
-        context.go('/restaurants');
+        context.go('/artists');
       }
     } else {
       setState(() {
@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Connexion'),
+        title: const Text('Trans Musicales - Connexion'),
         centerTitle: true,
       ),
       body: Padding(

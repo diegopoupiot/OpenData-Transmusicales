@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'pages/restaurants_list_page.dart';
 import 'pages/login_page.dart';
+import 'pages/artists_list_page.dart';
+import 'pages/artist_details_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+void main() {
+  runApp(const MyApp());
+}
 
 final _router = GoRouter(
   initialLocation: '/',
@@ -13,27 +17,25 @@ final _router = GoRouter(
       builder: (context, state) => const LoginPage(),
     ),
     GoRoute(
-      path: '/restaurants',
-      builder: (context, state) => const RestaurantsListPage(),
+      path: '/artists',
+      builder: (context, state) => const ArtistsListPage(),
     ),
     GoRoute(
-      path: '/details',
+      path: '/artist-details',
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>;
-        return MyHomePage(
+        return ArtistDetailsPage(
           name: extra['name'],
-          address: extra['address'],
-          likes: extra['likes'],
-          imageUrl: extra['imageUrl'],
+          origin: extra['origin'],
+          year: extra['year'],
+          style: extra['style'],
+          website: extra['website'],
+          spotify: extra['spotify'],
         );
       },
     ),
   ],
 );
-
-void main() {
-  runApp(const MyApp());
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -41,181 +43,58 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: _router,
-      title: 'Mon Application',
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('fr', ''),
-        Locale('en', ''),
-      ],
+      title: 'Trans Musicales',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 66, 66, 66)),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      routerConfig: _router,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  final String name;
-  final String address;
-  final int likes;
-  final String imageUrl;
-
-  const MyHomePage({
-    super.key,
-    required this.name,
-    required this.address,
-    required this.likes,
-    required this.imageUrl,
-  });
+  // ... existing code ...
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late int likes;
-  bool isFavorite = false;
+  late int currentLikes;
 
   @override
   void initState() {
     super.initState();
-    likes = widget.likes;
+    currentLikes = 0;
+  }
+
+  void _incrementLikes() {
+    setState(() {
+      currentLikes++;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/restaurants'),
-        ),
-        title: Text(
-          widget.name,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => context.go('/'),
-            tooltip: 'Déconnexion',
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+      // ... existing AppBar code ...
+      body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.network(
-              widget.imageUrl,
-              height: 200,
-              fit: BoxFit.cover,
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.name,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        widget.address,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.favorite,
-                          color: isFavorite ? Colors.red : Colors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            likes++;
-                            isFavorite = !isFavorite;
-                          });
-                        },
-                      ),
-                      Text(
-                        '$likes',
-                        style: TextStyle(
-                          color: isFavorite ? Colors.red : Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+            // ... existing image and other widgets ...
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                Column(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.phone),
-                      onPressed: null,
-                    ),
-                    Text('Appeler'),
-                  ],
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.favorite),
+                  onPressed: _incrementLikes,
                 ),
-                Column(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.map),
-                      onPressed: null,
-                    ),
-                    Text('Itinéraire'),
-                  ],
-                ),
-                Column(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: null,
-                    ),
-                    Text('Partager'),
-                  ],
-                ),
-              ].toList(),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                l10n.restaurantDescription,
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.justify,
-              ),
+                Text('$currentLikes likes'),
+              ],
             ),
           ],
         ),
