@@ -7,11 +7,25 @@ import '../providers/theme_provider.dart';
 import '../widgets/theme_toggle_button.dart';
 import '../widgets/logout_button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class ArtistDetailsPage extends StatefulWidget {
   final String artistName;
+  final String origin;
+  final String year;
+  final String? style;
+  final String? website;
+  final String? spotify;
 
-  const ArtistDetailsPage({super.key, required this.artistName});
+  const ArtistDetailsPage({
+    super.key,
+    required this.artistName,
+    required this.origin,
+    required this.year,
+    this.style,
+    this.website,
+    this.spotify,
+  });
 
   @override
   State<ArtistDetailsPage> createState() => ArtistDetailsPageState();

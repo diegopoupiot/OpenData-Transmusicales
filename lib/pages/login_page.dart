@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -16,10 +17,23 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
   String? _errorMessage;
 
-  Future<void> _login() async {
+  void _login() {
+    setState(() {
+      _isLoading = true;
+    });
+
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        context.go('/artists');
+      }
+    });
+  }
+
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -27,16 +41,28 @@ class _LoginPageState extends State<LoginPage> {
       _errorMessage = null;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: _usernameController.text,
+        password: _passwordController.text,
+      );
 
-    if (_usernameController.text == 'admin' &&
-        _passwordController.text == 'password') {
       if (mounted) {
         context.go('/artists');
       }
-    } else {
+    } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorMessage = 'Nom d\'utilisateur ou mot de passe incorrect';
+        if (e.code == 'weak-password') {
+          _errorMessage = 'Le mot de passe fourni est trop faible.';
+        } else if (e.code == 'email-already-in-use') {
+          _errorMessage = 'Un compte existe déjà pour cet email.';
+        } else {
+          _errorMessage = 'Erreur d\'inscription: ${e.message}';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Une erreur s\'est produite: $e';
       });
     }
 
@@ -114,12 +140,12 @@ class _LoginPageState extends State<LoginPage> {
                             TextFormField(
                               controller: _usernameController,
                               decoration: const InputDecoration(
-                                labelText: 'Nom d\'utilisateur',
-                                prefixIcon: Icon(Icons.person),
+                                labelText: 'Email',
+                                prefixIcon: Icon(Icons.email),
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer un nom d\'utilisateur';
+                                  return 'Veuillez entrer un email';
                                 }
                                 return null;
                               },
