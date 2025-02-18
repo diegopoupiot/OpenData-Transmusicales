@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.watch<ThemeProvider>().isDarkMode;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trans Musicales'),

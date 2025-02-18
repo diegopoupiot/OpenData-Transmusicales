@@ -7,6 +7,7 @@ import 'package:flutter_application/pages/artists_list_page.dart';
 import 'package:flutter_application/pages/artist_details_page.dart';
 import 'package:flutter_application/theme/app_theme.dart';
 import 'package:flutter_application/providers/theme_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
   runApp(
@@ -36,15 +37,9 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: '/artist-details',
           builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>;
+            final artist = state.extra as Map<String, dynamic>;
             return ArtistDetailsPage(
-              name: extra['name'],
-              origin: extra['origin'],
-              year: extra['year'],
-              style: extra['style'],
-              website: extra['website'],
-              spotify: extra['spotify'],
-            );
+                artistName: artist['artistes'] ?? 'Unknown Artist');
           },
         ),
       ],
@@ -56,15 +51,18 @@ class MyApp extends StatelessWidget {
           title: 'Trans Musicales',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          themeMode:
+              themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           routerConfig: goRouter,
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
+            AppLocalizations.delegate,
           ],
           supportedLocales: const [
             Locale('fr'),
+            Locale('en'),
           ],
         );
       },
