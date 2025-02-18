@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -27,23 +29,70 @@ class _LoginPageState extends State<LoginPage> {
       _errorMessage = null;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (_usernameController.text == 'admin' &&
-        _passwordController.text == 'password') {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: _usernameController.text,
+        password: _passwordController.text,
+      );
+      
       if (mounted) {
         context.go('/artists');
       }
-    } else {
+    } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorMessage = 'Nom d\'utilisateur ou mot de passe incorrect';
+        if (e.code == 'user-not-found') {
+          _errorMessage = 'Aucun utilisateur trouvé pour cet email.';
+        } else if (e.code == 'wrong-password') {
+          _errorMessage = 'Mot de passe incorrect.';
+        } else {
+          _errorMessage = 'Erreur de connexion: ${e.message}';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Une erreur s\'est produite: $e';
       });
     }
+  }
 
+  Future<void> _register() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  setState(() {
+    _isLoading = true;
+    _errorMessage = null;
+  });
+
+  try {
+    await _auth.createUserWithEmailAndPassword(
+      email: _usernameController.text,
+      password: _passwordController.text,
+    );
+    
+    if (mounted) {
+      context.go('/artists');
+    }
+  } on FirebaseAuthException catch (e) {
     setState(() {
-      _isLoading = false;
+      if (e.code == 'weak-password') {
+        _errorMessage = 'Le mot de passe fourni est trop faible.';
+      } else if (e.code == 'email-already-in-use') {
+        _errorMessage = 'Un compte existe déjà pour cet email.';
+      } else {
+        _errorMessage = 'Erreur d\'inscription: ${e.message}';
+      }
+    });
+  } catch (e) {
+    setState(() {
+      _errorMessage = 'Une erreur s\'est produite: $e';
     });
   }
+
+  setState(() {
+    _isLoading = false;
+  });
+}
+
 
   @override
   void dispose() {

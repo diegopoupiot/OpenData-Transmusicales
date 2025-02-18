@@ -7,8 +7,9 @@ import 'package:flutter_application/pages/artists_list_page.dart';
 import 'package:flutter_application/pages/artist_details_page.dart';
 import 'package:flutter_application/theme/app_theme.dart';
 import 'package:flutter_application/providers/theme_provider.dart';
-
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+void main() async {
+  await Firebase.initializeApp();
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
