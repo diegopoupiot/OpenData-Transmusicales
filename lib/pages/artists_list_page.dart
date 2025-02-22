@@ -103,7 +103,16 @@ class _ArtistsListPageState extends State<ArtistsListPage> {
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: InkWell(
-        onTap: () => _onArtistTap(artist, imageUrl),
+        onTap: () {
+          context.go('/artist-details', extra: {
+            'name': artist['artistes'],
+            'origin': artist['origin'],
+            'year': artist['year'],
+            'style': artist['style'],
+            'website': artist['website'],
+            'spotify': artist['spotify'],
+          });
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
