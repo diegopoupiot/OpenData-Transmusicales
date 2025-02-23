@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -15,25 +16,14 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isLogin = true;
 
-  void _login() {
-    setState(() {
-      _isLoading = true;
-    });
-
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        context.go('/artists');
-      }
-    });
-  }
-
-  Future<void> _register() async {
+  Future<void> _authenticate() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -42,38 +32,51 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await _auth.createUserWithEmailAndPassword(
-        email: _usernameController.text,
-        password: _passwordController.text,
-      );
-
-      if (mounted) {
-        context.go('/artists');
+      if (_isLogin) {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+      } else {
+        await _auth.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
       }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        if (e.code == 'weak-password') {
-          _errorMessage = 'Le mot de passe fourni est trop faible.';
-        } else if (e.code == 'email-already-in-use') {
-          _errorMessage = 'Un compte existe déjà pour cet email.';
-        } else {
-          _errorMessage = 'Erreur d\'inscription: ${e.message}';
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Une erreur s\'est produite: $e';
-      });
-    }
 
-    setState(() {
-      _isLoading = false;
-    });
+      if (mounted) context.go('/artists');
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'weak-password':
+          message = 'Le mot de passe est trop faible.';
+          break;
+        case 'email-already-in-use':
+          message = 'Un compte existe déjà avec cet email.';
+          break;
+        case 'user-not-found':
+          message = 'Aucun utilisateur trouvé avec cet email.';
+          break;
+        case 'wrong-password':
+          message = 'Mot de passe incorrect.';
+          break;
+        case 'invalid-email':
+          message = 'Adresse email invalide.';
+          break;
+        default:
+          message = 'Erreur d\'authentification: ${e.message}';
+      }
+      setState(() => _errorMessage = message);
+    } catch (e) {
+      setState(() => _errorMessage = 'Erreur inattendue: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -86,9 +89,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: const Text('Trans Musicales'),
         centerTitle: true,
-        actions: const [
-          ThemeToggleButton(),
-        ],
+        actions: const [ThemeToggleButton()],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -102,23 +103,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: 120,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.error,
-                            size: 120,
-                            color: Colors.white,
-                          );
-                        },
-                      ),
+                    Image.asset(
+                      'assets/images/logo.png',
+                      height: 120,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.error, size: 120, color: Colors.white),
                     ),
                     const SizedBox(height: 48),
-                    // Login Form
                     Container(
                       padding: const EdgeInsets.all(24.0),
                       decoration: BoxDecoration(
@@ -135,66 +126,52 @@ class _LoginPageState extends State<LoginPage> {
                       child: Form(
                         key: _formKey,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             TextFormField(
-                              controller: _usernameController,
+                              controller: _emailController,
                               decoration: const InputDecoration(
                                 labelText: 'Email',
-                                prefixIcon: Icon(Icons.email),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer un email';
-                                }
-                                return null;
-                              },
+                                prefixIcon: Icon(Icons.email)),
+                              validator: (v) => v!.isEmpty ? 'Veuillez entrer un email' : null,
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _passwordController,
+                              obscureText: true,
                               decoration: const InputDecoration(
                                 labelText: 'Mot de passe',
-                                prefixIcon: Icon(Icons.lock),
-                              ),
-                              obscureText: true,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer un mot de passe';
-                                }
-                                return null;
-                              },
+                                prefixIcon: Icon(Icons.lock)),
+                              validator: (v) => v!.isEmpty ? 'Veuillez entrer un mot de passe' : null,
                             ),
                             if (_errorMessage != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 16),
-                                child: Text(
-                                  _errorMessage!,
-                                  style: const TextStyle(color: Colors.red),
-                                  textAlign: TextAlign.center,
-                                ),
+                                child: Text(_errorMessage!,
+                                    style: const TextStyle(color: Colors.red)),
                               ),
                             const SizedBox(height: 24),
                             SizedBox(
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: _isLoading ? null : _login,
+                                onPressed: _isLoading ? null : _authenticate,
                                 child: _isLoading
-                                    ? const SizedBox(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Text(
-                                        'Se connecter',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : Text(_isLogin ? 'Se connecter' : 'S\'inscrire',
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
+                            ),
+                            TextButton(
+                              onPressed: () => setState(() => _isLogin = !_isLogin),
+                              child: Text(_isLogin
+                                  ? "Pas encore de compte ? S'inscrire"
+                                  : "Déjà un compte ? Se connecter"),
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () {
+                                context.go('/artists');
+                              },
+                              child: const Text('Bypass Authentification'),
                             ),
                           ],
                         ),
