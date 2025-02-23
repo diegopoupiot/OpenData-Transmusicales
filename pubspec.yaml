@@ -30,8 +30,10 @@ environment:
 dependencies:
   firebase_core: ^2.32.0
   firebase_auth: ^4.16.0
+  flutter_rating_bar: ^4.0.0
   flutter:
     sdk: flutter
+  shared_preferences: ^2.0.13
   flutter_localizations:
     sdk: flutter
   intl: any

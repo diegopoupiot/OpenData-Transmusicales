@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/theme_toggle_button.dart';
 import '../widgets/logout_button.dart';
+import '../widgets/comment_section.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -294,6 +295,26 @@ class ArtistDetailsPageState extends State<ArtistDetailsPage> {
                               ],
                             ),
                           ),
+                           Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 20),
+                              const SizedBox(height: 20),
+                              Text(
+                                "Notes et Commentaires",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              CommentSection(artistName: widget.artistName),
+                            ],
+                          ),
+                        ),
                         ],
                       ),
                     ),
